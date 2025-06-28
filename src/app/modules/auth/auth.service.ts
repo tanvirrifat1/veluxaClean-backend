@@ -18,6 +18,7 @@ import { ResetToken } from '../resetToken/resetToken.model';
 import downloadImage from '../../../util/file/downloadImage';
 import { USER_ROLES } from '../../../enums/user';
 import deleteFile from '../../../util/file/deleteFile';
+import { facebookUser } from './auth.lib';
 
 const googleLogin = async ({
   email,
@@ -76,6 +77,65 @@ const googleLogin = async ({
 
   return { accessToken, refreshToken, user };
 };
+
+const faceBookLogin = async (token: string) => {
+  const userData = await facebookUser(token);
+
+  const image = userData?.picture.data.url;
+
+  let user = await User.findOne({ facebookId: userData.id }).select(
+    '+facebookId'
+  );
+
+  const newImage = image
+    ? await downloadImage(image)
+    : '/public/image/placeholder.png';
+
+  if (!user) {
+    user = await User.create({
+      email: userData.email,
+      name: userData.name,
+      facebookId: userData.id,
+      image: newImage,
+      role: USER_ROLES.USER,
+      verified: true,
+    });
+  } else {
+    if (user.facebookId && user.facebookId !== userData.id) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, 'You are not authorized');
+    }
+
+    if (newImage && user.image !== newImage) {
+      const oldImage = user.image;
+      user.image = newImage;
+      if (oldImage) await deleteFile(oldImage);
+    }
+
+    Object.assign(user, {
+      name: userData.name,
+      image: newImage,
+      facebookId: userData.id,
+    });
+    await user.save();
+  }
+
+  // Create access token
+  const accessToken = jwtHelper.createToken(
+    { id: user._id, role: user.role, email: user.email },
+    config.jwt.jwt_secret as Secret,
+    '35d'
+  );
+
+  // Create refresh token
+  const refreshToken = jwtHelper.createToken(
+    { id: user._id, role: user.role, email: user.email },
+    config.jwt.jwtRefreshSecret as Secret,
+    '65d'
+  );
+
+  return { accessToken, refreshToken, user };
+};
+
 const loginUserFromDB = async (payload: ILoginData) => {
   const { email, password } = payload;
   const isExistUser = await User.findOne({ email }).select('+password');
@@ -407,4 +467,5 @@ export const AuthService = {
   newAccessTokenToUser,
   resendVerificationEmailToDB,
   googleLogin,
+  faceBookLogin,
 };
