@@ -78,8 +78,20 @@ const getAllBlogs = async (query: Record<string, unknown>) => {
   };
 };
 
+const deleteBlog = async (id: string) => {
+  const isExist = await Blog.findById(id);
+  if (!isExist) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Blog not found');
+  }
+  if (isExist.image) {
+    unlinkFile(isExist.image as string);
+  }
+  await Blog.findByIdAndDelete(id);
+};
+
 export const BlogService = {
   createBlog,
   updateBlog,
   getAllBlogs,
+  deleteBlog,
 };
