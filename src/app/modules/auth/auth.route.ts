@@ -12,7 +12,7 @@ router.post(
   AuthController.loginUser
 );
 
-router.post('/login-social', AuthController.loginUserSocial);
+router.post('/google-login', AuthController.googleLogin);
 
 router.post('/refresh-token', AuthController.newAccessToken);
 

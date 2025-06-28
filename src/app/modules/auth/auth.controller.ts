@@ -91,8 +91,8 @@ const resendVerificationEmail = catchAsync(
   }
 );
 
-const loginUserSocial = catchAsync(async (req: Request, res: Response) => {
-  const result = await AuthService.loginUserSocial(req.body);
+const googleLogin = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthService.googleLogin(req.body);
 
   sendResponse(res, {
     success: true,
@@ -110,5 +110,5 @@ export const AuthController = {
   changePassword,
   newAccessToken,
   resendVerificationEmail,
-  loginUserSocial,
+  googleLogin,
 };

@@ -16,7 +16,7 @@ import generateOTP from '../../../util/generateOTP';
 import { User } from '../user/user.model';
 import { ResetToken } from '../resetToken/resetToken.model';
 
-const loginUserSocial = async (payload: ILoginData) => {
+const googleLogin = async (payload: ILoginData) => {
   const { email, appId, role, type } = payload;
 
   if (type !== 'social') {
@@ -395,5 +395,5 @@ export const AuthService = {
   changePasswordToDB,
   newAccessTokenToUser,
   resendVerificationEmailToDB,
-  loginUserSocial,
+  googleLogin,
 };
