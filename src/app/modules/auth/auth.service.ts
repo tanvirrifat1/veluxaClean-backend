@@ -15,56 +15,67 @@ import {
 import generateOTP from '../../../util/generateOTP';
 import { User } from '../user/user.model';
 import { ResetToken } from '../resetToken/resetToken.model';
+import downloadImage from '../../../util/file/downloadImage';
+import { USER_ROLES } from '../../../enums/user';
+import deleteFile from '../../../util/file/deleteFile';
 
-const googleLogin = async (payload: ILoginData) => {
-  const { email, appId, role, type } = payload;
+const googleLogin = async ({
+  email,
+  name,
+  image,
+  uid,
+}: {
+  email: string;
+  name: string;
+  image: string;
+  uid: string;
+}) => {
+  let user = await User.findOne({ email }).select('+googleId');
 
-  if (type !== 'social') {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid login type');
-  }
-
-  let user = await User.findOne({ email });
+  const newImage = image
+    ? await downloadImage(image)
+    : '/public/image/placeholder.png';
 
   if (!user) {
-    try {
-      user = await User.create({
-        email,
-        appId,
-        role,
-        verified: true,
-        image: '',
-      });
-    } catch (error) {
-      throw new ApiError(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        'Failed to create user'
-      );
+    user = await User.create({
+      email,
+      name,
+      googleId: uid,
+      image: newImage,
+      role: USER_ROLES.USER,
+      verified: true,
+    });
+  } else {
+    if (user.googleId && user.googleId !== uid) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, 'You are not authorized');
     }
+
+    if (newImage && user.image !== newImage) {
+      const oldImage = user.image;
+      user.image = newImage;
+      if (oldImage) await deleteFile(oldImage);
+    }
+
+    Object.assign(user, { name, image: newImage, googleId: uid });
+    await user.save();
   }
 
-  const payloadData = {
-    id: user._id,
-    role: user.role,
-    email: user.email,
-  };
-
+  // Create access token
   const accessToken = jwtHelper.createToken(
-    payloadData,
+    { id: user._id, role: user.role, email: user.email },
     config.jwt.jwt_secret as Secret,
-    config.jwt.jwt_expire_in as string
+    '35d'
   );
 
+  // Create refresh token
   const refreshToken = jwtHelper.createToken(
-    payloadData,
+    { id: user._id, role: user.role, email: user.email },
     config.jwt.jwtRefreshSecret as Secret,
-    config.jwt.jwt_refresh_expire_in as string
+    '65d'
   );
 
-  const userData: any = user.toObject();
-
-  return { accessToken, refreshToken, userData };
+  return { accessToken, refreshToken, user };
 };
-
 const loginUserFromDB = async (payload: ILoginData) => {
   const { email, password } = payload;
   const isExistUser = await User.findOne({ email }).select('+password');

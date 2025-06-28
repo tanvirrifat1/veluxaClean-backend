@@ -6,7 +6,7 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 
-const imageDir = path.join(process.cwd(), 'upload', 'image');
+const imageDir = path.join(process.cwd(), 'uploads', 'image');
 
 const downloadImage = async (url: string) => {
   logger.info(colors.green(`🔍 Downloading image from: ${url}`));

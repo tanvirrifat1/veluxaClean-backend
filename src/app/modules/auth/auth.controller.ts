@@ -13,18 +13,24 @@ const verifyEmail = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: result.message,
-    data: result.data,
+    data: result,
   });
 });
 
 const loginUser = catchAsync(async (req: Request, res: Response) => {
-  const loginData = req.body;
-  await AuthService.loginUserFromDB(loginData);
+  const { ...loginData } = req.body;
+  const result = await AuthService.loginUserFromDB(loginData);
+
+  res.cookie('refreshToken', result.refreshToken, {
+    secure: config.node_env === 'production',
+    httpOnly: true,
+  });
 
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
-    message: 'OTP sent to your email. Please verify to login.',
+    message: 'User login successfully',
+    data: result,
   });
 });
 
