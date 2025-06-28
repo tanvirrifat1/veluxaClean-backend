@@ -31,4 +31,10 @@ router.patch(
   }
 );
 
+router.get(
+  '/all-blogs',
+  auth(USER_ROLES.ADMIN, USER_ROLES.USER),
+  BlogController.getAllBlogs
+);
+
 export const BlogRouter = router;
