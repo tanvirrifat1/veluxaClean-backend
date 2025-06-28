@@ -19,4 +19,16 @@ router.post(
   }
 );
 
+router.patch(
+  '/update-blog/:id',
+  fileUploadHandler,
+  auth(USER_ROLES.ADMIN),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = BlogValidation.updateBlogZodSchema.parse(
+      JSON.parse(req.body.data)
+    );
+    return BlogController.updateBlog(req, res, next);
+  }
+);
+
 export const BlogRouter = router;

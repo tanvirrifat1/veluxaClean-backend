@@ -5,6 +5,12 @@ const createBlogZodSchema = z.object({
   description: z.string({ required_error: 'description is required' }),
 });
 
+const updateBlogZodSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+});
+
 export const BlogValidation = {
   createBlogZodSchema,
+  updateBlogZodSchema,
 };
