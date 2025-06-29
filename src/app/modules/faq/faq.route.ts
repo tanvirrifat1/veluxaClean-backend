@@ -21,4 +21,10 @@ router.patch(
   FaqController.updateFaq
 );
 
+router.get(
+  '/get-all-faq',
+  auth(USER_ROLES.ADMIN, USER_ROLES.USER),
+  FaqController.getAllFaq
+);
+
 export const FaqRouter = router;

@@ -21,7 +21,55 @@ const updateFaq = async (id: string, payload: Partial<IFaq>) => {
   });
 };
 
+const getAllFaq = async (query: Record<string, unknown>) => {
+  const { page, limit, searchTerm, ...filterData } = query;
+  const conditions: any[] = [];
+
+  if (searchTerm) {
+    conditions.push({
+      $or: [
+        { question: { $regex: searchTerm, $options: 'i' } },
+        { answer: { $regex: searchTerm, $options: 'i' } },
+      ],
+    });
+  }
+  // Add filter conditions
+  if (Object.keys(filterData).length > 0) {
+    const filterConditions = Object.entries(filterData).map(
+      ([field, value]) => ({
+        [field]: value,
+      })
+    );
+    conditions.push({ $and: filterConditions });
+  }
+
+  const whereConditions = conditions.length ? { $and: conditions } : {};
+
+  // Pagination setup
+  const pages = parseInt(page as string) || 1;
+  const size = parseInt(limit as string) || 10;
+  const skip = (pages - 1) * size;
+
+  const result = await Faq.find(whereConditions)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(size)
+    .lean();
+  const total = await Faq.countDocuments();
+
+  const data = {
+    result,
+    meta: {
+      page: pages,
+      limit: size,
+      total,
+    },
+  };
+  return data;
+};
+
 export const FaqService = {
   createFaq,
   updateFaq,
+  getAllFaq,
 };

@@ -23,7 +23,18 @@ const updateFaq = catchAsync(async (req, res) => {
   });
 });
 
+const getAllFaq = catchAsync(async (req, res) => {
+  const result = await FaqService.getAllFaq(req.query);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Faq retrieved successfully',
+    data: result,
+  });
+});
+
 export const FaqController = {
   createFaq,
   updateFaq,
+  getAllFaq,
 };
