@@ -3,7 +3,6 @@ import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { BlogService } from './blog.service';
 import { getFilePathMultiple } from '../../../shared/getFilePath';
-import { IBlog } from './blog.interface';
 
 const createBlog = catchAsync(async (req, res) => {
   const value = {

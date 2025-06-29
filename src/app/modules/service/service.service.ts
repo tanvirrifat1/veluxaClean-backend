@@ -4,15 +4,19 @@ import { IService } from './service.interface';
 import { CleaningService } from './service.model';
 import unlinkFile from '../../../shared/unlinkFile';
 
+// const createServiceToDB = async (payload: IService) => {
+//   const isExist = await CleaningService.findOne({
+//     serviceName: payload.serviceName,
+//     category: payload.category,
+//   });
+//   if (isExist) {
+//     payload.image && unlinkFile(payload.image);
+//     throw new ApiError(StatusCodes.BAD_REQUEST, 'Service already exists');
+//   }
+//   return await CleaningService.create(payload);
+// };
+
 const createServiceToDB = async (payload: IService) => {
-  const isExist = await CleaningService.findOne({
-    serviceName: payload.serviceName,
-    category: payload.category,
-  });
-  if (isExist) {
-    payload.image && unlinkFile(payload.image);
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Service already exists');
-  }
   return await CleaningService.create(payload);
 };
 
@@ -68,6 +72,8 @@ const getAllService = async (query: Record<string, unknown>) => {
     conditions.push({ $and: filterConditions });
   }
 
+  conditions.push({ isDeleted: false });
+
   const whereConditions = conditions.length ? { $and: conditions } : {};
 
   // Pagination setup
@@ -102,9 +108,21 @@ const getSingleService = async (id: string) => {
   return result;
 };
 
+const deleteService = async (id: string) => {
+  const isExist = await CleaningService.findById(id);
+  if (!isExist) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Service not found');
+  }
+  return await CleaningService.findOneAndUpdate(
+    { _id: id },
+    { isDeleted: true }
+  );
+};
+
 export const CleaningServiceService = {
   createServiceToDB,
   updateServiceToDB,
   getAllService,
   getSingleService,
+  deleteService,
 };

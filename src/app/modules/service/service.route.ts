@@ -47,4 +47,10 @@ router.get(
   CleaningServiceController.getSingleService
 );
 
+router.delete(
+  '/delete-service/:id',
+  auth(USER_ROLES.ADMIN),
+  CleaningServiceController.deleteService
+);
+
 export const CleaningServiceRoutes = router;
