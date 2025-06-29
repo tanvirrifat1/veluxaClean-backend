@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
-import { IBlog } from './blog.interface';
+import { IBlog, UpdateBlogPayload } from './blog.interface';
 import { Blog } from './blog.model';
 import unlinkFile from '../../../shared/unlinkFile';
 
@@ -8,26 +8,71 @@ const createBlog = async (payload: IBlog) => {
   const isExist = await Blog.exists({ title: payload.title });
 
   if (isExist) {
-    payload.image && unlinkFile(payload.image);
+    if (payload.image && Array.isArray(payload.image)) {
+      payload.image.forEach(img => unlinkFile(img));
+    } else if (typeof payload.image === 'string') {
+      unlinkFile(payload.image);
+    }
+
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Blog already exists');
   }
 
   return await Blog.create(payload);
 };
 
-const updateBlog = async (id: string, payload: Partial<IBlog>) => {
-  const isExist = await Blog.findById(id);
-  if (!isExist) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Blog not found');
+// const updateBlog = async (id: string, payload: Partial<IBlog>) => {
+//   const isExist = await Blog.findById(id);
+//   if (!isExist) {
+//     throw new ApiError(StatusCodes.BAD_REQUEST, 'Blog not found');
+//   }
+
+//   if (isExist) {
+//     if (payload.image && Array.isArray(payload.image)) {
+//       payload.image.forEach(img => unlinkFile(img));
+//     } else if (typeof payload.image === 'string') {
+//       unlinkFile(payload.image);
+//     }
+
+//     throw new ApiError(StatusCodes.BAD_REQUEST, 'Blog already exists');
+//   }
+
+//   return await Blog.findOneAndUpdate({ _id: id }, payload, {
+//     new: true,
+//   });
+// };
+
+const updateBlog = async (id: string, payload: UpdateBlogPayload) => {
+  const isExistProducts = await Blog.findById(id);
+
+  if (!isExistProducts) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Product doesn't exist!");
   }
 
-  if (payload.image && isExist.image) {
-    unlinkFile(isExist.image as string);
+  if (payload.imagesToDelete && payload.imagesToDelete.length > 0) {
+    for (let image of payload.imagesToDelete) {
+      unlinkFile(image);
+    }
+
+    isExistProducts.image = isExistProducts.image.filter(
+      (img: string) => !payload.imagesToDelete!.includes(img)
+    );
   }
 
-  return await Blog.findOneAndUpdate({ _id: id }, payload, {
+  const updatedImages = payload.image
+    ? [...isExistProducts.image, ...payload.image]
+    : isExistProducts.image;
+
+  const updateData = {
+    ...payload,
+    image: updatedImages,
+  };
+
+  const result = await Blog.findByIdAndUpdate(id, updateData, {
     new: true,
+    runValidators: true,
   });
+
+  return result;
 };
 
 const getAllBlogs = async (query: Record<string, unknown>) => {
@@ -83,10 +128,24 @@ const deleteBlog = async (id: string) => {
   if (!isExist) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Blog not found');
   }
+
   if (isExist.image) {
-    unlinkFile(isExist.image as string);
+    if (Array.isArray(isExist.image)) {
+      isExist.image.forEach(img => unlinkFile(img));
+    } else {
+      unlinkFile(isExist.image);
+    }
   }
+
   await Blog.findByIdAndDelete(id);
+};
+
+const getDetails = async (id: string) => {
+  const result = await Blog.findById(id).lean<IBlog>();
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Blog not found');
+  }
+  return result;
 };
 
 export const BlogService = {
@@ -94,4 +153,5 @@ export const BlogService = {
   updateBlog,
   getAllBlogs,
   deleteBlog,
+  getDetails,
 };

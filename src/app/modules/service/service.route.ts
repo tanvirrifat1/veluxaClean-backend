@@ -35,4 +35,16 @@ router.patch(
   }
 );
 
+router.get(
+  '/get-all-service',
+  auth(USER_ROLES.ADMIN, USER_ROLES.USER),
+  CleaningServiceController.getAllService
+);
+
+router.get(
+  '/get-details/:id',
+  auth(USER_ROLES.ADMIN, USER_ROLES.USER),
+  CleaningServiceController.getSingleService
+);
+
 export const CleaningServiceRoutes = router;

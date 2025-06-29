@@ -48,7 +48,29 @@ const updateServiceToDB = catchAsync(async (req, res) => {
   });
 });
 
+const getAllService = catchAsync(async (req, res) => {
+  const result = await CleaningServiceService.getAllService(req.query);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Service retrived successfully',
+    data: result,
+  });
+});
+
+const getSingleService = catchAsync(async (req, res) => {
+  const result = await CleaningServiceService.getSingleService(req.params.id);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Service retrived successfully',
+    data: result,
+  });
+});
+
 export const CleaningServiceController = {
   createServiceToDB,
   updateServiceToDB,
+  getAllService,
+  getSingleService,
 };

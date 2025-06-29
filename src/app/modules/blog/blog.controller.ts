@@ -13,7 +13,7 @@ const createBlog = catchAsync(async (req, res) => {
   let image = getFilePathMultiple(req.files, 'image', 'image');
 
   if (image && image.length > 0) {
-    value.image = image[0];
+    value.image = image;
   }
 
   const result = await BlogService.createBlog(value);
@@ -26,23 +26,22 @@ const createBlog = catchAsync(async (req, res) => {
 });
 
 const updateBlog = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const { body, files } = req;
-
-  const imagePaths = getFilePathMultiple(files, 'image', 'image');
-
-  const payload: Partial<IBlog> = {
-    ...body,
-    ...(imagePaths?.length && { image: imagePaths[0] }),
+  const value = {
+    ...req.body,
   };
 
-  const updatedBlog = await BlogService.updateBlog(id, payload);
+  let image = getFilePathMultiple(req.files, 'image', 'image');
 
+  if (image && image.length > 0) {
+    value.image = image;
+  }
+
+  const result = await BlogService.updateBlog(req.params.id, value);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: 'Blog updated successfully',
-    data: updatedBlog,
+    message: 'Blog Created Successfully',
+    data: result,
   });
 });
 
@@ -68,9 +67,21 @@ const deleteBlog = catchAsync(async (req, res) => {
   });
 });
 
+const getDetails = catchAsync(async (req, res) => {
+  const result = await BlogService.getDetails(req.params.id);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Blog retrieved successfully',
+    data: result,
+  });
+});
+
 export const BlogController = {
   createBlog,
   updateBlog,
   getAllBlogs,
   deleteBlog,
+  getDetails,
 };

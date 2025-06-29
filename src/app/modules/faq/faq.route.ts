@@ -33,4 +33,10 @@ router.delete(
   FaqController.deleteFaq
 );
 
+router.get(
+  '/details-faq/:id',
+  auth(USER_ROLES.ADMIN),
+  FaqController.getDetails
+);
+
 export const FaqRouter = router;

@@ -7,6 +7,7 @@ import unlinkFile from '../../../shared/unlinkFile';
 const createServiceToDB = async (payload: IService) => {
   const isExist = await CleaningService.findOne({
     serviceName: payload.serviceName,
+    category: payload.category,
   });
   if (isExist) {
     payload.image && unlinkFile(payload.image);
@@ -29,11 +30,7 @@ const updateServiceToDB = async (
   }
 
   if (payload.image && isExist?.image) {
-    try {
-      await unlinkFile(isExist.image as string);
-    } catch (error) {
-      console.error('Failed to delete old image:', error);
-    }
+    unlinkFile(isExist.image as string);
   }
 
   const updatedService = await CleaningService.findOneAndUpdate(
@@ -49,7 +46,65 @@ const updateServiceToDB = async (
   return updatedService;
 };
 
+const getAllService = async (query: Record<string, unknown>) => {
+  const { page, limit, searchTerm, ...filterData } = query;
+  const conditions: any[] = [];
+
+  if (searchTerm) {
+    conditions.push({
+      $or: [
+        { serviceName: { $regex: searchTerm, $options: 'i' } },
+        { category: { $regex: searchTerm, $options: 'i' } },
+      ],
+    });
+  }
+  // Add filter conditions
+  if (Object.keys(filterData).length > 0) {
+    const filterConditions = Object.entries(filterData).map(
+      ([field, value]) => ({
+        [field]: value,
+      })
+    );
+    conditions.push({ $and: filterConditions });
+  }
+
+  const whereConditions = conditions.length ? { $and: conditions } : {};
+
+  // Pagination setup
+  const pages = parseInt(page as string) || 1;
+  const size = parseInt(limit as string) || 10;
+  const skip = (pages - 1) * size;
+
+  // Set default sort order to show new data first
+  const result = await CleaningService.find(whereConditions)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(size)
+    .lean<IService[]>();
+
+  const total = await CleaningService.countDocuments(whereConditions);
+
+  return {
+    result,
+    meta: {
+      page: pages,
+      limit: size,
+      total,
+    },
+  };
+};
+
+const getSingleService = async (id: string) => {
+  const result = await CleaningService.findById(id).lean<IService>();
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Service not found');
+  }
+  return result;
+};
+
 export const CleaningServiceService = {
   createServiceToDB,
   updateServiceToDB,
+  getAllService,
+  getSingleService,
 };

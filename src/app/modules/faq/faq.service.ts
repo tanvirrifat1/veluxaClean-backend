@@ -76,9 +76,18 @@ const deleteFaq = async (id: string) => {
   return await Faq.findOneAndDelete({ _id: id });
 };
 
+const getDetails = async (id: string) => {
+  const result = await Faq.findById(id).lean<IFaq>();
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Faq not found');
+  }
+  return result;
+};
+
 export const FaqService = {
   createFaq,
   updateFaq,
   getAllFaq,
   deleteFaq,
+  getDetails,
 };

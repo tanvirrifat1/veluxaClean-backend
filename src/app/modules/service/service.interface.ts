@@ -5,4 +5,5 @@ export type IService = {
   additionalServices: Record<string, number>;
   image: string;
   category: string;
+  isDeleted?: boolean;
 };

@@ -19,14 +19,38 @@ router.post(
   }
 );
 
+// router.patch(
+//   '/update-blog/:id',
+//   fileUploadHandler,
+//   auth(USER_ROLES.ADMIN),
+//   (req: Request, res: Response, next: NextFunction) => {
+//     req.body = BlogValidation.updateBlogZodSchema.parse(
+//       JSON.parse(req.body.data)
+//     );
+//     return BlogController.updateBlog(req, res, next);
+//   }
+// );
+
 router.patch(
   '/update-blog/:id',
-  fileUploadHandler,
   auth(USER_ROLES.ADMIN),
+  fileUploadHandler,
   (req: Request, res: Response, next: NextFunction) => {
-    req.body = BlogValidation.updateBlogZodSchema.parse(
-      JSON.parse(req.body.data)
-    );
+    const { imagesToDelete, data } = req.body;
+
+    if (!data && imagesToDelete) {
+      req.body = { imagesToDelete };
+      return BlogController.updateBlog(req, res, next);
+    }
+
+    if (data) {
+      const parsedData = BlogValidation.updateBlogZodSchema.parse(
+        JSON.parse(data)
+      );
+
+      req.body = { ...parsedData, imagesToDelete };
+    }
+
     return BlogController.updateBlog(req, res, next);
   }
 );
@@ -41,6 +65,12 @@ router.delete(
   '/delete-blog/:id',
   auth(USER_ROLES.ADMIN),
   BlogController.deleteBlog
+);
+
+router.get(
+  '/get-details/:id',
+  auth(USER_ROLES.ADMIN),
+  BlogController.getDetails
 );
 
 export const BlogRouter = router;
