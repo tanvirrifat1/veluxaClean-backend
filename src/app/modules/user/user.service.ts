@@ -70,7 +70,7 @@ const getAllUsers = async (query: Record<string, unknown>) => {
 
   if (searchTerm) {
     conditions.push({
-      $or: [{ fullName: { $regex: searchTerm, $options: 'i' } }],
+      $or: [{ name: { $regex: searchTerm, $options: 'i' } }],
     });
   }
 
