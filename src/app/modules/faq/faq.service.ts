@@ -68,8 +68,17 @@ const getAllFaq = async (query: Record<string, unknown>) => {
   return data;
 };
 
+const deleteFaq = async (id: string) => {
+  const isExist = await Faq.findById(id);
+  if (!isExist) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Faq not found');
+  }
+  return await Faq.findOneAndDelete({ _id: id });
+};
+
 export const FaqService = {
   createFaq,
   updateFaq,
   getAllFaq,
+  deleteFaq,
 };

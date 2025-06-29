@@ -33,8 +33,19 @@ const getAllFaq = catchAsync(async (req, res) => {
   });
 });
 
+const deleteFaq = catchAsync(async (req, res) => {
+  const result = await FaqService.deleteFaq(req.params.id);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Faq deleted successfully',
+    data: result,
+  });
+});
+
 export const FaqController = {
   createFaq,
   updateFaq,
   getAllFaq,
+  deleteFaq,
 };
