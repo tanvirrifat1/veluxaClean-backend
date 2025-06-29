@@ -21,4 +21,18 @@ router.post(
   }
 );
 
+router.patch(
+  '/update-service/:id',
+  fileUploadHandler,
+  auth(USER_ROLES.ADMIN),
+  (req: Request, res: Response, next: NextFunction) => {
+    if (req.body.data) {
+      req.body = CleaningServiceValidation.updateServiceSchema.parse(
+        JSON.parse(req.body.data)
+      );
+    }
+    return CleaningServiceController.updateServiceToDB(req, res, next);
+  }
+);
+
 export const CleaningServiceRoutes = router;

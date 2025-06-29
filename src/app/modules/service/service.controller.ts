@@ -24,6 +24,31 @@ const createServiceToDB = catchAsync(async (req, res) => {
   });
 });
 
+const updateServiceToDB = catchAsync(async (req, res) => {
+  const value = {
+    ...req.body,
+  };
+
+  let image = getFilePathMultiple(req.files, 'image', 'image');
+
+  if (image && image.length > 0) {
+    value.image = image[0];
+  }
+
+  const result = await CleaningServiceService.updateServiceToDB(
+    req.params.id,
+    value
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Service updated successfully',
+    data: result,
+  });
+});
+
 export const CleaningServiceController = {
   createServiceToDB,
+  updateServiceToDB,
 };

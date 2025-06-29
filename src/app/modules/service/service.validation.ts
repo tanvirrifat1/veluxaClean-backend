@@ -22,6 +22,29 @@ const serviceSchema = z.object({
   additionalServices: z.record(z.number()).optional(),
 });
 
+const updateServiceSchema = z.object({
+  category: z
+    .string()
+    .refine(
+      value =>
+        [
+          'Residential Cleaning Services',
+          'Move-in/Move-out Cleaning',
+          'Carpet Cleaning Service',
+          'Commercial Cleaning Service',
+        ].includes(value),
+      {
+        message: 'Invalid service name',
+      }
+    )
+    .optional(),
+  details: z.string().optional(),
+  serviceName: z.string().optional(),
+  price: z.number().optional(),
+  additionalServices: z.record(z.number()).optional(),
+});
+
 export const CleaningServiceValidation = {
   serviceSchema,
+  updateServiceSchema,
 };
