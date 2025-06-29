@@ -7,6 +7,14 @@ const createFaqZodSchema = z.object({
   }),
 });
 
+const updateFaqZodSchema = z.object({
+  body: z.object({
+    question: z.string().optional(),
+    answer: z.string().optional(),
+  }),
+});
+
 export const FaqValidation = {
   createFaqZodSchema,
+  updateFaqZodSchema,
 };

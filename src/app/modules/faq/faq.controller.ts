@@ -13,6 +13,17 @@ const createFaq = catchAsync(async (req, res) => {
   });
 });
 
+const updateFaq = catchAsync(async (req, res) => {
+  const result = await FaqService.updateFaq(req.params.id, req.body);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Faq updated successfully',
+    data: result,
+  });
+});
+
 export const FaqController = {
   createFaq,
+  updateFaq,
 };

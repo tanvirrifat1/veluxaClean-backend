@@ -11,6 +11,17 @@ const createFaq = async (payload: IFaq) => {
   return await Faq.create(payload);
 };
 
+const updateFaq = async (id: string, payload: Partial<IFaq>) => {
+  const isExist = await Faq.findById(id);
+  if (!isExist) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Faq not found');
+  }
+  return await Faq.findOneAndUpdate({ _id: id }, payload, {
+    new: true,
+  });
+};
+
 export const FaqService = {
   createFaq,
+  updateFaq,
 };

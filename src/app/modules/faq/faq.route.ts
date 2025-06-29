@@ -14,4 +14,11 @@ router.post(
   FaqController.createFaq
 );
 
+router.patch(
+  '/update-faq/:id',
+  auth(USER_ROLES.ADMIN),
+  validateRequest(FaqValidation.updateFaqZodSchema),
+  FaqController.updateFaq
+);
+
 export const FaqRouter = router;
