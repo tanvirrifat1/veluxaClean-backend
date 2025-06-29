@@ -11,6 +11,17 @@ const createReview = async (data: IReview) => {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Sorry! Booking not found');
   }
 
+  const isExist = await Review.findOne({
+    user: data.user,
+    service: data.service,
+  });
+  if (isExist) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'You already reviewed this service'
+    );
+  }
+
   return await Review.create(data);
 };
 
