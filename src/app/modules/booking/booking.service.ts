@@ -23,6 +23,32 @@ const createBooking = async (payload: IBooking) => {
   return await Booking.create(value);
 };
 
+const getAllBookings = async (query: Record<string, unknown>) => {
+  const { page, limit } = query;
+
+  const pages = parseInt(page as string) || 1;
+  const size = parseInt(limit as string) || 10;
+  const skip = (pages - 1) * size;
+
+  const result = await Booking.find()
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(size)
+    .lean();
+  const total = await Booking.countDocuments();
+
+  const data: any = {
+    result,
+    meta: {
+      page: pages,
+      limit: size,
+      total,
+    },
+  };
+  return data;
+};
+
 export const BookingService = {
   createBooking,
+  getAllBookings,
 };

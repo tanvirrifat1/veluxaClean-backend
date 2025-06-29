@@ -12,6 +12,19 @@ import { sendNotifications } from '../../../helpers/notificationHelper';
 import unlinkFile from '../../../shared/unlinkFile';
 
 const createUserFromDb = async (payload: IUser) => {
+  if (payload.role && payload.role === USER_ROLES.ADMIN) {
+    throw new ApiError(
+      StatusCodes.FORBIDDEN,
+      'You cannot create an Admin user from this route.'
+    );
+  }
+
+  if (payload.verified === true) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Cannot create a verified user directly.'
+    );
+  }
   payload.role = USER_ROLES.USER;
 
   const newUser = await User.create(payload);
