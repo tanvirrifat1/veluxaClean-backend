@@ -8,12 +8,14 @@ const createCheckoutSessionController = async (req: Request, res: Response) => {
 
   const { service } = req.body;
 
+  const value = {
+    user,
+    email,
+    service,
+  };
+
   try {
-    const sessionUrl = await PaymentService.createCheckoutSessionService(
-      user,
-      email,
-      service
-    );
+    const sessionUrl = await PaymentService.createCheckoutSessionService(value);
     res.status(200).json({ url: sessionUrl });
   } catch (error) {
     console.error('Error creating Stripe checkout session:', error);

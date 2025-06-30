@@ -3,19 +3,24 @@ import config from '../../../config';
 import { Payment } from './payment.model';
 import { Types } from 'mongoose';
 import { CleaningService } from '../service/service.model';
+import ApiError from '../../../errors/ApiError';
+import { StatusCodes } from 'http-status-codes';
+import { TPayment } from './payment.constant';
 
 export const stripe = new Stripe(config.payment.stripe_secret_key as string, {
   apiVersion: '2025-01-27.acacia',
 });
 
-const createCheckoutSessionService = async (
-  user: string,
-  email: string,
-  service: string
-) => {
-  const isServiceExist = await CleaningService.findById(service);
+const createCheckoutSessionService = async (payload: TPayment) => {
+  const isServiceExist = await CleaningService.findById(payload.service);
 
-  console.log(isServiceExist);
+  if (!isServiceExist) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Service not found');
+  }
+
+  const user = payload.user;
+
+  const service = payload.service;
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -32,7 +37,7 @@ const createCheckoutSessionService = async (
         },
       ],
       mode: 'payment',
-      customer_email: email,
+      customer_email: payload.email,
       success_url:
         'https://yourapp.com/success?session_id={CHECKOUT_SESSION_ID}',
       cancel_url: 'https://yourapp.com/cancel',
@@ -53,9 +58,11 @@ const handleStripeWebhookService = async (event: Stripe.Event) => {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
 
+      console.log(session);
+
       const { amount_total, metadata, payment_intent, status } = session;
-      const userId = metadata?.userId as string;
-      const products = JSON.parse(metadata?.products || '[]');
+      const userId = metadata?.user as string;
+      const service = metadata?.service;
       const email = session.customer_email || '';
 
       const amountTotal = (amount_total ?? 0) / 100;
@@ -63,10 +70,10 @@ const handleStripeWebhookService = async (event: Stripe.Event) => {
       const paymentRecord = new Payment({
         amount: amountTotal,
         user: new Types.ObjectId(userId),
-        service: new Types.ObjectId(products[0]),
+        service: new Types.ObjectId(service),
         email,
         transactionId: payment_intent,
-        status: status,
+        status,
       });
 
       await paymentRecord.save();
@@ -75,9 +82,8 @@ const handleStripeWebhookService = async (event: Stripe.Event) => {
 
     case 'checkout.session.async_payment_failed': {
       const session = event.data.object as Stripe.Checkout.Session;
-      console.log(session);
-      const { client_secret } = session;
-      const payment = await Payment.findOne({ client_secret });
+      const { payment_intent } = session;
+      const payment = await Payment.findOne({ transactionId: payment_intent });
       if (payment) {
         payment.status = 'Failed';
         await payment.save();
@@ -86,7 +92,7 @@ const handleStripeWebhookService = async (event: Stripe.Event) => {
     }
 
     default:
-      console.log(`Unhandled event type ${event.type}`);
+      console.log(`Unhandled event type: ${event.type}`);
   }
 };
 
