@@ -6,6 +6,7 @@ import { CleaningService } from '../service/service.model';
 import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
 import { TPayment } from './payment.constant';
+import { Booking } from '../booking/booking.model';
 
 export const stripe = new Stripe(config.payment.stripe_secret_key as string, {
   apiVersion: '2025-01-27.acacia',
@@ -58,8 +59,6 @@ const handleStripeWebhookService = async (event: Stripe.Event) => {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
 
-      console.log(session);
-
       const { amount_total, metadata, payment_intent, status } = session;
       const userId = metadata?.user as string;
       const service = metadata?.service;
@@ -75,6 +74,23 @@ const handleStripeWebhookService = async (event: Stripe.Event) => {
         transactionId: payment_intent,
         status,
       });
+
+      if (paymentRecord.status === 'complete') {
+        await Booking.findOneAndUpdate(
+          {
+            user: new Types.ObjectId(userId),
+            service: new Types.ObjectId(service),
+          },
+          {
+            $set: {
+              status: 'completed',
+            },
+          },
+          {
+            new: true,
+          }
+        );
+      }
 
       await paymentRecord.save();
       break;
