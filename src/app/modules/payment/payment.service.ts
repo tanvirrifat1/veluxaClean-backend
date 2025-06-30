@@ -1,5 +1,4 @@
 import Stripe from 'stripe';
-import config from '../../../config';
 import { Payment } from './payment.model';
 import { Types } from 'mongoose';
 import { CleaningService } from '../service/service.model';
@@ -7,10 +6,7 @@ import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
 import { TPayment } from './payment.constant';
 import { Booking } from '../booking/booking.model';
-
-export const stripe = new Stripe(config.payment.stripe_secret_key as string, {
-  apiVersion: '2025-01-27.acacia',
-});
+import { stripe } from '../../../shared/stripe';
 
 const createCheckoutSessionService = async (payload: TPayment) => {
   const isServiceExist = await CleaningService.findById(payload.service);
@@ -77,18 +73,9 @@ const handleStripeWebhookService = async (event: Stripe.Event) => {
 
       if (paymentRecord.status === 'complete') {
         await Booking.findOneAndUpdate(
-          {
-            user: new Types.ObjectId(userId),
-            service: new Types.ObjectId(service),
-          },
-          {
-            $set: {
-              status: 'completed',
-            },
-          },
-          {
-            new: true,
-          }
+          { user: userId, service, status: 'pending' },
+          { $set: { status: 'completed' } },
+          { new: true, sort: { createdAt: -1 } }
         );
       }
 
@@ -101,7 +88,7 @@ const handleStripeWebhookService = async (event: Stripe.Event) => {
       const { payment_intent } = session;
       const payment = await Payment.findOne({ transactionId: payment_intent });
       if (payment) {
-        payment.status = 'Failed';
+        payment.status = 'failed';
         await payment.save();
       }
       break;
@@ -112,7 +99,37 @@ const handleStripeWebhookService = async (event: Stripe.Event) => {
   }
 };
 
+const getAllPayment = async (query: Record<string, unknown>) => {
+  const { page, limit } = query;
+  const pages = parseInt(page as string) || 1;
+  const size = parseInt(limit as string) || 10;
+  const skip = (pages - 1) * size;
+  const result = await Payment.find({ status: 'complete' })
+    .populate({
+      path: 'user',
+      select: 'name email -_id',
+    })
+    .populate({
+      path: 'service',
+    })
+    .sort('-createdAt')
+    .skip(skip)
+    .limit(size)
+    .lean();
+  const total = await Payment.countDocuments({ status: 'complete' });
+  const data: any = {
+    result,
+    meta: {
+      page: pages,
+      limit: size,
+      total,
+    },
+  };
+  return data;
+};
+
 export const PaymentService = {
   createCheckoutSessionService,
   handleStripeWebhookService,
+  getAllPayment,
 };

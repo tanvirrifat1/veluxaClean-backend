@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
-import { PaymentService, stripe } from './payment.service';
+import { PaymentService } from './payment.service';
 import config from '../../../config';
+import { stripe } from '../../../shared/stripe';
+import catchAsync from '../../../shared/catchAsync';
+import sendResponse from '../../../shared/sendResponse';
+import { StatusCodes } from 'http-status-codes';
 
 const createCheckoutSessionController = async (req: Request, res: Response) => {
   const user: string = req.user.id;
@@ -40,7 +44,19 @@ const stripeWebhookController = async (req: Request, res: Response) => {
   }
 };
 
+const getAllPayment = catchAsync(async (req: Request, res: Response) => {
+  const result = await PaymentService.getAllPayment(req.query);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Payment retrieved successfully',
+    data: result,
+  });
+});
+
 export const PaymentController = {
   createCheckoutSessionController,
   stripeWebhookController,
+  getAllPayment,
 };

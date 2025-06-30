@@ -12,4 +12,10 @@ router.post(
   PaymentController.createCheckoutSessionController
 );
 
+router.get(
+  '/get-all-payment',
+  auth(USER_ROLES.ADMIN),
+  PaymentController.getAllPayment
+);
+
 export const PaymentRoutes = router;
