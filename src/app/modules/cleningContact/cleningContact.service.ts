@@ -77,8 +77,17 @@ const cleaningStatus = async (
   }
 };
 
+const deleteCleaningContact = async (id: string) => {
+  const isExist = await CleaningContact.findById(id);
+  if (!isExist) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Contact not found');
+  }
+  return await CleaningContact.findByIdAndDelete(id);
+};
+
 export const CleaningContactService = {
   createCleaningContact,
   getAllCleaningContact,
   cleaningStatus,
+  deleteCleaningContact,
 };

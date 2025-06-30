@@ -46,8 +46,22 @@ const cleaningStatus = catchAsync(async (req, res) => {
   });
 });
 
+const deleteCleaningContact = catchAsync(async (req, res) => {
+  const result = await CleaningContactService.deleteCleaningContact(
+    req.params.id
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Cleaning Contact deleted successfully',
+    data: result,
+  });
+});
+
 export const CleaningContactController = {
   createCleaningContact,
   getAllCleaningContact,
   cleaningStatus,
+  deleteCleaningContact,
 };

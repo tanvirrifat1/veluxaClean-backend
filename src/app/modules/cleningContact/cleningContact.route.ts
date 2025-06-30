@@ -26,4 +26,10 @@ router.patch(
   CleaningContactController.cleaningStatus
 );
 
+router.delete(
+  '/delete/:id',
+  auth(USER_ROLES.ADMIN),
+  CleaningContactController.deleteCleaningContact
+);
+
 export const CleaningContactRouter = router;
