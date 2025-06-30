@@ -21,6 +21,33 @@ const createCleaningContact = catchAsync(async (req, res) => {
   });
 });
 
+const getAllCleaningContact = catchAsync(async (req, res) => {
+  const result = await CleaningContactService.getAllCleaningContact(req.query);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Cleaning Contact retrieved successfully',
+    data: result,
+  });
+});
+
+const cleaningStatus = catchAsync(async (req, res) => {
+  const result = await CleaningContactService.cleaningStatus(
+    req.params.id,
+    req.body
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Cleaning Contact updated successfully',
+    data: result,
+  });
+});
+
 export const CleaningContactController = {
   createCleaningContact,
+  getAllCleaningContact,
+  cleaningStatus,
 };

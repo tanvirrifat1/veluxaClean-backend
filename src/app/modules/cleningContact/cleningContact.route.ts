@@ -14,4 +14,16 @@ router.post(
   CleaningContactController.createCleaningContact
 );
 
+router.get(
+  '/get-all-cleaning-contact',
+  auth(USER_ROLES.ADMIN),
+  CleaningContactController.getAllCleaningContact
+);
+
+router.patch(
+  '/cleaning-status/:id',
+  auth(USER_ROLES.ADMIN),
+  CleaningContactController.cleaningStatus
+);
+
 export const CleaningContactRouter = router;
