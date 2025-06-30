@@ -15,4 +15,10 @@ router.post(
   ReviewController.createReview
 );
 
+router.get(
+  '/get-review/:service',
+  auth(USER_ROLES.USER, USER_ROLES.ADMIN),
+  ReviewController.getReview
+);
+
 export const ReviewRouter = router;
