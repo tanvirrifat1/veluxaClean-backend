@@ -11,4 +11,10 @@ router.post(
   ManualBookingController.createManualBooking
 );
 
+router.get(
+  '/get-all-manual-booking',
+  auth(USER_ROLES.ADMIN),
+  ManualBookingController.getAllBookings
+);
+
 export const ManualBookingRouter = router;

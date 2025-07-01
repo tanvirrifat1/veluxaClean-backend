@@ -13,6 +13,17 @@ const createManualBooking = catchAsync(async (req, res) => {
   });
 });
 
+const getAllBookings = catchAsync(async (req, res) => {
+  const result = await ManualBookingService.getAllBookings(req.query);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Manual Booking retrieved successfully',
+    data: result,
+  });
+});
+
 export const ManualBookingController = {
   createManualBooking,
+  getAllBookings,
 };
