@@ -12,6 +12,7 @@ import { CleaningContactRouter } from '../app/modules/cleningContact/cleningCont
 import { BlogReviewRouter } from '../app/modules/blogReview/blogReview.route';
 import { DashboardRouter } from '../app/modules/dashboard/dashboard.route';
 import { ManualBookingRouter } from '../app/modules/manualBooking/manualBooking.route';
+import { SettingRoutes } from '../app/modules/seeting/seeting.route';
 
 const router = express.Router();
 
@@ -29,6 +30,7 @@ const apiRoutes = [
   { path: '/blogReview', route: BlogReviewRouter },
   { path: '/dashboard', route: DashboardRouter },
   { path: '/manual-booking', route: ManualBookingRouter },
+  { path: '/setting', route: SettingRoutes },
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));
