@@ -14,6 +14,7 @@ import { DashboardRouter } from '../app/modules/dashboard/dashboard.route';
 import { ManualBookingRouter } from '../app/modules/manualBooking/manualBooking.route';
 import { SettingRoutes } from '../app/modules/seeting/seeting.route';
 import { QuestionAndAnsRoutes } from '../app/modules/questionAndAns/questionAndAns.route';
+import { ChatRoomRoutes } from '../app/modules/chatRoom/chatRoom.route';
 
 const router = express.Router();
 
@@ -33,6 +34,7 @@ const apiRoutes = [
   { path: '/manual-booking', route: ManualBookingRouter },
   { path: '/setting', route: SettingRoutes },
   { path: '/question-and-ans', route: QuestionAndAnsRoutes },
+  { path: '/chat', route: ChatRoomRoutes },
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));

@@ -1,8 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
-
 import { Room } from '../chatRoom/chatRoom.model';
-
 import openai from '../../../shared/openAi';
 import { IQuestionAndAns } from './questionAndAns.interface';
 import { QuestionAndAns } from './questionAndAns.model';
