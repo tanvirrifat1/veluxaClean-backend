@@ -11,4 +11,10 @@ router.post(
   BlogReviewController.createReviewFormDb
 );
 
+router.get(
+  '/get-all-review/:id',
+  auth(USER_ROLES.USER),
+  BlogReviewController.getAllReview
+);
+
 export const BlogReviewRouter = router;

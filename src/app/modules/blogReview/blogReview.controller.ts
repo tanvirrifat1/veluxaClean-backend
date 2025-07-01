@@ -20,6 +20,17 @@ const createReviewFormDb = catchAsync(async (req, res) => {
   });
 });
 
+const getAllReview = catchAsync(async (req, res) => {
+  const result = await BlogReviewService.getAllReview(req.params.id, req.query);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Review retrieved successfully',
+    data: result,
+  });
+});
+
 export const BlogReviewController = {
   createReviewFormDb,
+  getAllReview,
 };
