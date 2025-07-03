@@ -15,28 +15,70 @@ const createCleaningContact = async (payload: ICleaningContact) => {
   return await CleaningContact.create(value);
 };
 
-const getAllCleaningContact = async (query: Record<string, unknown>) => {
-  const { page, limit } = query;
+// const getAllCleaningContact = async (query: Record<string, unknown>) => {
+//   const { page, limit } = query;
 
+//   const pages = parseInt(page as string) || 1;
+//   const size = parseInt(limit as string) || 10;
+//   const skip = (pages - 1) * size;
+
+//   const result = await CleaningContact.find()
+//     .sort({ createdAt: -1 })
+//     .skip(skip)
+//     .limit(size)
+//     .lean();
+//   const total = await CleaningContact.countDocuments();
+//   const data: any = {
+//     result,
+//     meta: {
+//       page: pages,
+//       limit: size,
+//       total,
+//     },
+//   };
+//   return data;
+// };
+
+const getAllCleaningContact = async (query: Record<string, unknown>) => {
+  const { page, limit, searchTerm, ...filterData } = query;
+  const anyConditions: any[] = [];
+
+  if (searchTerm) {
+    anyConditions.push({
+      $or: [{ name: { $regex: searchTerm, $options: 'i' } }],
+    });
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    const filterConditions = Object.entries(filterData).map(
+      ([field, value]) => ({ [field]: value })
+    );
+    anyConditions.push({ $and: filterConditions });
+  }
+
+  const whereConditions =
+    anyConditions.length > 0 ? { $and: anyConditions } : {};
+
+  // Pagination setup
   const pages = parseInt(page as string) || 1;
   const size = parseInt(limit as string) || 10;
   const skip = (pages - 1) * size;
 
-  const result = await CleaningContact.find()
+  const result = await CleaningContact.find(whereConditions)
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(size)
     .lean();
-  const total = await CleaningContact.countDocuments();
-  const data: any = {
+
+  const count = await CleaningContact.countDocuments(whereConditions);
+
+  return {
     result,
     meta: {
       page: pages,
-      limit: size,
-      total,
+      total: count,
     },
   };
-  return data;
 };
 
 const cleaningStatus = async (

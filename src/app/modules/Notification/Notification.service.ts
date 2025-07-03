@@ -66,7 +66,7 @@ const adminReadNotification = async () => {
 };
 
 const deleteAllNotifications = async () => {
-  const result = await Notification.deleteMany({});
+  const result = await Notification.deleteMany({ type: 'ADMIN' });
   return result;
 };
 
