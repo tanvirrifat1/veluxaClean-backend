@@ -107,7 +107,7 @@ const getAllPayment = async (query: Record<string, unknown>) => {
   const result = await Payment.find({ status: 'complete' })
     .populate({
       path: 'user',
-      select: 'name email -_id',
+      select: 'name email image -_id',
     })
     .populate({
       path: 'service',
