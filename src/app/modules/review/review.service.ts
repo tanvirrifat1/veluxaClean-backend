@@ -56,7 +56,32 @@ const getReview = async (service: string, query: Record<string, unknown>) => {
   return data;
 };
 
+const getReviewForAll = async (query: Record<string, unknown>) => {
+  const { page, limit } = query;
+  const pages = parseInt(page as string) || 1;
+  const size = parseInt(limit as string) || 10;
+  const skip = (pages - 1) * size;
+
+  const result = await Review.find()
+    .populate('user', 'name email createdAt -_id')
+    .sort('-createdAt')
+    .skip(skip)
+    .limit(size)
+    .lean();
+  const total = await Review.countDocuments();
+  const data: any = {
+    result,
+    meta: {
+      page: pages,
+      limit: size,
+      total,
+    },
+  };
+  return data;
+};
+
 export const ReviewService = {
   createReview,
   getReview,
+  getReviewForAll,
 };

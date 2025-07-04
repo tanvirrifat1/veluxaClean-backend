@@ -29,7 +29,18 @@ const getReview = catchAsync(async (req, res) => {
   });
 });
 
+const getReviewForAll = catchAsync(async (req, res) => {
+  const result = await ReviewService.getReviewForAll(req.query);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Review retrived successfully',
+    data: result,
+  });
+});
+
 export const ReviewController = {
   createReview,
   getReview,
+  getReviewForAll,
 };

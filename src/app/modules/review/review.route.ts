@@ -21,4 +21,10 @@ router.get(
   ReviewController.getReview
 );
 
+router.get(
+  '/get-all-review',
+  auth(USER_ROLES.USER, USER_ROLES.ADMIN),
+  ReviewController.getReviewForAll
+);
+
 export const ReviewRouter = router;
