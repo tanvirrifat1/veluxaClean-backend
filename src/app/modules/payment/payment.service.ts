@@ -36,9 +36,8 @@ const createCheckoutSessionService = async (payload: TPayment) => {
       mode: 'payment',
       customer_email: payload.email,
       success_url:
-        'https://payment-status-hrvd608hb-tanvirrifat1s-projects.vercel.app/success',
-      cancel_url:
-        'https://payment-status-hrvd608hb-tanvirrifat1s-projects.vercel.app/failure',
+        'https://yourapp.com/success?session_id={CHECKOUT_SESSION_ID}',
+      cancel_url: 'https://yourapp.com/cancel',
       metadata: {
         user,
         service,
