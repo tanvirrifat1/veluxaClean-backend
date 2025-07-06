@@ -43,11 +43,7 @@ router.patch(
   }
 );
 
-router.get(
-  '/all-blogs',
-  auth(USER_ROLES.ADMIN, USER_ROLES.USER),
-  BlogController.getAllBlogs
-);
+router.get('/all-blogs', BlogController.getAllBlogs);
 
 router.delete(
   '/delete-blog/:id',
@@ -55,10 +51,6 @@ router.delete(
   BlogController.deleteBlog
 );
 
-router.get(
-  '/get-details/:id',
-  auth(USER_ROLES.ADMIN),
-  BlogController.getDetails
-);
+router.get('/get-details/:id', BlogController.getDetails);
 
 export const BlogRouter = router;

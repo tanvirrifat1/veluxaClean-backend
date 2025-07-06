@@ -35,17 +35,9 @@ router.patch(
   }
 );
 
-router.get(
-  '/get-all-service',
-  auth(USER_ROLES.ADMIN, USER_ROLES.USER),
-  CleaningServiceController.getAllService
-);
+router.get('/get-all-service', CleaningServiceController.getAllService);
 
-router.get(
-  '/get-details/:id',
-  auth(USER_ROLES.ADMIN, USER_ROLES.USER),
-  CleaningServiceController.getSingleService
-);
+router.get('/get-details/:id', CleaningServiceController.getSingleService);
 
 router.delete(
   '/delete-service/:id',

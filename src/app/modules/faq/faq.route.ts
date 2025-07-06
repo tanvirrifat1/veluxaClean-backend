@@ -21,11 +21,7 @@ router.patch(
   FaqController.updateFaq
 );
 
-router.get(
-  '/get-all-faq',
-  auth(USER_ROLES.ADMIN, USER_ROLES.USER),
-  FaqController.getAllFaq
-);
+router.get('/get-all-faq', FaqController.getAllFaq);
 
 router.delete(
   '/delete-faq/:id',
@@ -33,10 +29,6 @@ router.delete(
   FaqController.deleteFaq
 );
 
-router.get(
-  '/details-faq/:id',
-  auth(USER_ROLES.ADMIN),
-  FaqController.getDetails
-);
+router.get('/details-faq/:id', FaqController.getDetails);
 
 export const FaqRouter = router;

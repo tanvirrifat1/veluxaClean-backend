@@ -63,7 +63,7 @@ const getReviewForAll = async (query: Record<string, unknown>) => {
   const skip = (pages - 1) * size;
 
   const result = await Review.find()
-    .populate('user', 'name email createdAt -_id')
+    .populate('user', 'name email image createdAt -_id')
     .sort('-createdAt')
     .skip(skip)
     .limit(size)
