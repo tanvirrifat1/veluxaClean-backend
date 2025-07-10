@@ -62,7 +62,7 @@ const getAllService = async (query: Record<string, unknown>) => {
       ],
     });
   }
-  // Add filter conditions
+
   if (Object.keys(filterData).length > 0) {
     const filterConditions = Object.entries(filterData).map(
       ([field, value]) => ({
@@ -76,13 +76,11 @@ const getAllService = async (query: Record<string, unknown>) => {
 
   const whereConditions = conditions.length ? { $and: conditions } : {};
 
-  // Pagination setup
   const pages = parseInt(page as string) || 1;
   const size = parseInt(limit as string) || 10;
   const skip = (pages - 1) * size;
 
-  // Set default sort order to show new data first
-  const result = await CleaningService.find(whereConditions)
+  const rawResult = await CleaningService.find(whereConditions)
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(size)
@@ -90,8 +88,21 @@ const getAllService = async (query: Record<string, unknown>) => {
 
   const total = await CleaningService.countDocuments(whereConditions);
 
+  // Group by category
+  const groupedResult: Record<string, IService[]> = rawResult.reduce(
+    (acc, service) => {
+      const category = service.category || 'Uncategorized';
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(service);
+      return acc;
+    },
+    {} as Record<string, IService[]>
+  );
+
   return {
-    result,
+    result: groupedResult,
     meta: {
       page: pages,
       limit: size,
