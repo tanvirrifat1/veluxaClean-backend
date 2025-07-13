@@ -44,6 +44,8 @@ const createBlog = async (payload: IBlog) => {
 const updateBlog = async (id: string, payload: UpdateBlogPayload) => {
   const isExistProducts = await Blog.findById(id);
 
+  console.log(isExistProducts);
+
   if (!isExistProducts) {
     throw new ApiError(StatusCodes.NOT_FOUND, "Product doesn't exist!");
   }
