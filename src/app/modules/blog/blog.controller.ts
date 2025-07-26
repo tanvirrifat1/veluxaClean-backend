@@ -32,7 +32,7 @@ const updateBlog = catchAsync(async (req, res) => {
   let image = getFilePathMultiple(req.files, 'image', 'image');
 
   if (image && image.length > 0) {
-    value.image = image;
+    value.image = image[0];
   }
 
   const result = await BlogService.updateBlog(req.params.id, value);

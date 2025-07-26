@@ -40,13 +40,17 @@ const createCleaningContact = async (payload: ICleaningContact) => {
 // };
 
 const getAllCleaningContact = async (query: Record<string, unknown>) => {
-  const { page, limit, searchTerm, ...filterData } = query;
+  const { page, limit, searchTerm, status, ...filterData } = query;
   const anyConditions: any[] = [];
 
   if (searchTerm) {
     anyConditions.push({
       $or: [{ name: { $regex: searchTerm, $options: 'i' } }],
     });
+  }
+
+  if (status) {
+    anyConditions.push({ status: { $regex: status, $options: 'i' } });
   }
 
   if (Object.keys(filterData).length > 0) {

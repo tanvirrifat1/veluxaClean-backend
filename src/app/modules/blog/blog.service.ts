@@ -20,62 +20,62 @@ const createBlog = async (payload: IBlog) => {
   return await Blog.create(payload);
 };
 
-// const updateBlog = async (id: string, payload: Partial<IBlog>) => {
-//   const isExist = await Blog.findById(id);
-//   if (!isExist) {
-//     throw new ApiError(StatusCodes.BAD_REQUEST, 'Blog not found');
-//   }
-
-//   if (isExist) {
-//     if (payload.image && Array.isArray(payload.image)) {
-//       payload.image.forEach(img => unlinkFile(img));
-//     } else if (typeof payload.image === 'string') {
-//       unlinkFile(payload.image);
-//     }
-
-//     throw new ApiError(StatusCodes.BAD_REQUEST, 'Blog already exists');
-//   }
-
-//   return await Blog.findOneAndUpdate({ _id: id }, payload, {
-//     new: true,
-//   });
-// };
-
-const updateBlog = async (id: string, payload: UpdateBlogPayload) => {
-  const isExistProducts = await Blog.findById(id);
-
-  console.log(isExistProducts);
-
-  if (!isExistProducts) {
-    throw new ApiError(StatusCodes.NOT_FOUND, "Product doesn't exist!");
+const updateBlog = async (id: string, payload: Partial<IBlog>) => {
+  const isExist = await Blog.findById(id);
+  if (!isExist) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Blog not found');
   }
 
-  if (payload.imagesToDelete && payload.imagesToDelete.length > 0) {
-    for (let image of payload.imagesToDelete) {
-      unlinkFile(image);
+  if (isExist) {
+    if (payload.image && Array.isArray(payload.image)) {
+      payload.image.forEach(img => unlinkFile(img));
+    } else if (typeof payload.image === 'string') {
+      unlinkFile(payload.image);
     }
 
-    isExistProducts.image = isExistProducts.image.filter(
-      (img: string) => !payload.imagesToDelete!.includes(img)
-    );
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Blog already exists');
   }
 
-  const updatedImages = payload.image
-    ? [...isExistProducts.image, ...payload.image]
-    : isExistProducts.image;
-
-  const updateData = {
-    ...payload,
-    image: updatedImages,
-  };
-
-  const result = await Blog.findByIdAndUpdate(id, updateData, {
+  return await Blog.findOneAndUpdate({ _id: id }, payload, {
     new: true,
-    runValidators: true,
   });
-
-  return result;
 };
+
+// const updateBlog = async (id: string, payload: UpdateBlogPayload) => {
+//   const isExistProducts = await Blog.findById(id);
+
+//   console.log(isExistProducts);
+
+//   if (!isExistProducts) {
+//     throw new ApiError(StatusCodes.NOT_FOUND, "Product doesn't exist!");
+//   }
+
+//   if (payload.imagesToDelete && payload.imagesToDelete.length > 0) {
+//     for (let image of payload.imagesToDelete) {
+//       unlinkFile(image);
+//     }
+
+//     isExistProducts.image = isExistProducts.image.filter(
+//       (img: string) => !payload.imagesToDelete!.includes(img)
+//     );
+//   }
+
+//   const updatedImages = payload.image
+//     ? [...isExistProducts.image, ...payload.image]
+//     : isExistProducts.image;
+
+//   const updateData = {
+//     ...payload,
+//     image: updatedImages,
+//   };
+
+//   const result = await Blog.findByIdAndUpdate(id, updateData, {
+//     new: true,
+//     runValidators: true,
+//   });
+
+//   return result;
+// };
 
 const getAllBlogs = async (query: Record<string, unknown>) => {
   const { page, limit, searchTerm, ...filterData } = query;

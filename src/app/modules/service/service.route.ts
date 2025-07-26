@@ -21,7 +21,7 @@ router.post(
   }
 );
 
-router.patch(
+router.put(
   '/update-service/:id',
   fileUploadHandler,
   auth(USER_ROLES.ADMIN),
